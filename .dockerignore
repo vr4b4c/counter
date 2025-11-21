@@ -1,0 +1,5 @@
+terraform
+Dockerfile
+compose.yml
+notes.md
+.envrc
