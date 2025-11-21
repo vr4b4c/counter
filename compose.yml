@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    ports:
+      - 9292:9292
+    environment:
+      - REDIS_URL=redis://redis:6379
+    command: bundle exec rackup --host 0.0.0.0 --port 9292
+    volumes:
+      - .:/usr/src/counter
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
