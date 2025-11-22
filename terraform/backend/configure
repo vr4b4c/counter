@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+main () {
+  # shellcheck disable=SC2154
+  ACTION=$action
+
+  case "$ACTION" in
+    "c" | "create")
+      create_s3_bucket
+      ;;
+    "d" | "destroy")
+      destroy_s3_bucket
+      ;;
+    *)
+      echo "Unknown action: $ACTION"
+      exit 1
+      ;;
+  esac
+}
+
+create_s3_bucket () {
+  local ROLE_ARN
+  # shellcheck disable=SC2154
+  local REGION=$region
+  # shellcheck disable=SC2154
+  local RESOURCE=$resource
+
+  ROLE_ARN=$(aws sts get-caller-identity | jq -r ".Arn")
+
+  aws s3 mb "s3://${RESOURCE}" \
+    --region "${REGION}"
+  aws s3api put-public-access-block \
+    --bucket "${RESOURCE}" \
+    --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+  sed \
+    -e "s/RESOURCE/arn:aws:s3:::${RESOURCE}/g" \
+    -e "s|ARN|${ROLE_ARN}|g" "$(dirname "$0")/policy-template.json" \
+    > policy.json
+  aws s3api put-bucket-policy \
+    --bucket "${RESOURCE}" \
+    --policy file://policy.json
+  aws s3api put-bucket-versioning \
+    --bucket "${RESOURCE}" \
+    --versioning-configuration Status=Enabled
+  rm policy.json
+}
+
+destroy_s3_bucket () {
+  # shellcheck disable=SC2154
+  local RESOURCE=$resource
+
+  local OBJECT_VERSION_IDS
+  OBJECT_VERSION_IDS=$(aws s3api list-object-versions \
+    --bucket "$RESOURCE" \
+    --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')
+  aws s3api delete-objects --bucket "$RESOURCE" --delete "$OBJECT_VERSION_IDS"
+
+  local MARKER_VERSION_IDS
+  MARKER_VERSION_IDS=$(aws s3api list-object-versions \
+    --bucket "$RESOURCE" \
+    --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}')
+  aws s3api delete-objects --bucket "$RESOURCE" --delete "$MARKER_VERSION_IDS"
+
+  aws s3 rb "s3://${RESOURCE}" --force
+}
+
+main
