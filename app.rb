@@ -24,7 +24,7 @@ class App
 
   def increment = reply(redis.incr('counter'))
 
-  def reply(value) = [200, { 'content-type' => 'text/html' }, ["[#{ENV.fetch('ENV_ID', 'none')}] Counter: #{value}"]]
+  def reply(value) = [200, { 'content-type' => 'text/html' }, ["[#{ENV.fetch('ENV_ID', 'none')}] Counter: #{value.to_i + 100}"]]
 
   def not_found = [404, { 'content-type' => 'text/plain' }, ['Not found']]
 end
