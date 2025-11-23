@@ -1,0 +1,13 @@
+name: Build
+
+on: 
+  push:
+
+jobs:
+  build-and-push-docker-image:
+    uses: ./.github/workflows/build-and-push-docker-image.yml
+    with:
+      git_ref: ${{ github.sha }}
+      aws_region: 'eu-central-1'
+      tags: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
+    secrets: inherit

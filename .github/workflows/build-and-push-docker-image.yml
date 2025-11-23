@@ -1,0 +1,52 @@
+name: Build and push Docker image
+
+on:
+  workflow_call:
+    inputs:
+      git_ref:
+        type: string
+        required: false
+
+      aws_region:
+        type: string
+        required: true
+
+      tags:
+        type: string
+        required: true
+
+jobs:
+  build:
+    name: 'Build and push Docker image'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.git_ref }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker-container
+        install: true
+        name: gha-builder
+
+    - name: Configure AWS credentials (with OIDC or access keys)
+      uses: aws-actions/configure-aws-credentials@v5
+      with:
+        aws-region: ${{ inputs.aws_region }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        push: true
+        tags: ${{ inputs.tags }}
+        cache-from: type=gha,scope=gha-builder
+        cache-to: type=gha,mode=max,scope=gha-builder
