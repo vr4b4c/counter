@@ -67,3 +67,4 @@ jobs:
             -var "ecs_cluster_id=arn:aws:ecs:eu-central-1:827018390108:cluster/counter-cluster" \
             -var "redis_sg_id=sg-05d70725888f9d391" \
             -var "redis_url=redis://counter-redis.5o0tjo.0001.euc1.cache.amazonaws.com:6379"
+            -var "alb_listener_arn=arn:aws:elasticloadbalancing:eu-central-1:827018390108:listener/app/counter-alb/732404661094a169/aafdc561e6ab7f9a"
