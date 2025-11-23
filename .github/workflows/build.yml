@@ -14,7 +14,7 @@ jobs:
 
   preview-infra:
     # needs: build-and-push-docker-image
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/infra.yml
     with:
       git_ref: ${{ github.sha }}
       aws_region: 'eu-central-1'
