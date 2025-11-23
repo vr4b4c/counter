@@ -12,45 +12,15 @@ jobs:
       tags: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
     secrets: inherit
 
-  infrastructure:
+  preview-infra:
+    if: github.event.action != 'closed'
     needs: build-and-push-docker-image
-    runs-on: ubuntu-latest
-    steps:
-      - uses: hashicorp/setup-terraform@v3
-
-      - name: Check out code
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.sha }}
-
-      - name: Configure AWS credentials (with OIDC or access keys)
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          aws-region: eu-central-1
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Terraform init
-        working-directory: 'terraform/preview'
-        run: terraform init -backend-config="key=envs/pr-${{ github.event.number }}.tfstate"
-
-      - name: Terraform Apply
-        if: github.event.action != 'closed'
-        working-directory: 'terraform/preview'
-        run: |
-          terraform apply \
-            -auto-approve \
-            -var "env_id=pr-${{ github.event.pull_request.number }}" \
-            -var "container_image=${{ vars.AWS_ECR_URI }}:${{ github.sha }}" \
-            -var "project=counter" \
-            -var "app_name=counter" \
-            -var "aws_region=eu-central-1" \
-            -var "hosted_zone_id=Z0538180DP9PM6347QX8" \
-            -var "env_id=pr-${{ github.event.number }}" \
-            -var "domain=chillax.hr" \
-            -var "alb_arn=arn:aws:elasticloadbalancing:eu-central-1:827018390108:loadbalancer/app/counter-alb/732404661094a169" \
-            -var "alb_dns_name=counter-alb-1955980250.eu-central-1.elb.amazonaws.com" \
-            -var "alb_sg_id=sg-0eb3db8386cbf8438" \
-            -var "ecs_cluster_id=arn:aws:ecs:eu-central-1:827018390108:cluster/counter-cluster" \
-            -var "redis_sg_id=sg-05d70725888f9d391" \
-            -var "redis_url=redis://counter-redis.5o0tjo.0001.euc1.cache.amazonaws.com:6379"
+    uses: ./.github/workflows/deploy.yml
+    with:
+      git_ref: ${{ github.sha }}
+      aws_region: 'eu-central-1'
+      env_id: pr-${{ github.event.number }}
+      container_image: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
+      tf_dir: 'terraform/preview'
+      tf_action: ${{ github.event.action != 'closed' && 'apply' || 'destroy' }}
+    secrets: inherit

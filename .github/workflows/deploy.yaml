@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      git_ref:
+        type: string
+        required: false
+
+      aws_region:
+        type: string
+        required: true
+
+      env_id:
+        type: string
+        required: true
+
+      tf_dir:
+        type: string
+        required: true
+
+      tf_action:
+        type: string
+        required: true
+
+
+jobs:
+  build:
+    name: 'Build and push Docker image'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.git_ref }}
+
+      - name: Configure AWS credentials (with OIDC or access keys)
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-region: eu-central-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Terraform init
+        working-directory: ${{ inputs.tf_dir }}
+        run: terraform init -backend-config="key=envs/${{ inputs.env_id }}.tfstate"
+      - name: Terraform Apply
+        working-directory: ${{ inputs.tf_dir }}
+        run: |
+          terraform ${{ inputs.tf_action }} \
+            -auto-approve \
+            -var "env_id=${{ inputs.env_id }}" \
+            -var "container_image=${{ inputs.container_image }}" \
+            -var "project=counter" \
+            -var "app_name=counter" \
+            -var "aws_region=eu-central-1" \
+            -var "hosted_zone_id=Z0538180DP9PM6347QX8" \
+            -var "domain=chillax.hr" \
+            -var "alb_arn=arn:aws:elasticloadbalancing:eu-central-1:827018390108:loadbalancer/app/counter-alb/732404661094a169" \
+            -var "alb_dns_name=counter-alb-1955980250.eu-central-1.elb.amazonaws.com" \
+            -var "alb_sg_id=sg-0eb3db8386cbf8438" \
+            -var "ecs_cluster_id=arn:aws:ecs:eu-central-1:827018390108:cluster/counter-cluster" \
+            -var "redis_sg_id=sg-05d70725888f9d391" \
+            -var "redis_url=redis://counter-redis.5o0tjo.0001.euc1.cache.amazonaws.com:6379"
