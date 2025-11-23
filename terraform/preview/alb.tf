@@ -10,7 +10,7 @@ resource "aws_lb_listener" "app" {
 }
 
 resource "aws_lb_target_group" "app" {
-  name        = "${var.app_name}-tg"
+  name        = "${var.app_name}-${var.env_id}-tg"
   port        = 9292
   protocol    = "HTTP"
   vpc_id      = data.aws_vpc.default.id
