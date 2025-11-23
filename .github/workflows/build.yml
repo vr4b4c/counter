@@ -4,23 +4,23 @@ on:
   pull_request:
 
 jobs:
-  build-and-push-docker-image:
-    uses: ./.github/workflows/build-and-push-docker-image.yml
-    with:
-      git_ref: ${{ github.sha }}
-      aws_region: 'eu-central-1'
-      tags: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
-    secrets: inherit
+  # build-and-push-docker-image:
+  #   uses: ./.github/workflows/build-and-push-docker-image.yml
+  #   with:
+  #     git_ref: ${{ github.sha }}
+  #     aws_region: 'eu-central-1'
+  #     tags: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
+  #   secrets: inherit
 
   preview-infra:
-    if: github.event.action != 'closed'
-    needs: build-and-push-docker-image
+    # needs: build-and-push-docker-image
     uses: ./.github/workflows/deploy.yml
     with:
       git_ref: ${{ github.sha }}
       aws_region: 'eu-central-1'
       env_id: pr-${{ github.event.number }}
-      container_image: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
+      # container_image: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
+      container_image: ${{ vars.AWS_ECR_URI }}:1354ddbb219e430f637a719d0cbaf843f8d393b7
       tf_dir: 'terraform/preview'
       tf_action: ${{ github.event.action != 'closed' && 'apply' || 'destroy' }}
     secrets: inherit
