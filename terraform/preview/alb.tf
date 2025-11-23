@@ -19,7 +19,7 @@ resource "aws_lb_listener_rule" "app" {
   listener_arn = data.aws_lb_listener.default.arn
   # Generate a unique priority based on env_id to avoid conflicts
   # Using modulo to keep priority in valid range (1-50000, but keeping it reasonable)
-  priority = crc32("${var.app_name}-${var.env_id}") % 500 + 1
+  priority = tonumber(substr(md5("${var.app_name}-${var.env_id}"), 0, 8), 16) % 500 + 1
 
   action {
     type             = "forward"
