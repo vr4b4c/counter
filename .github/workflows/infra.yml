@@ -27,7 +27,6 @@ on:
         type: string
         required: true
 
-
 jobs:
   build:
     name: 'Build and push Docker image'
@@ -44,6 +43,8 @@ jobs:
           aws-region: eu-central-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - uses: hashicorp/setup-terraform@v3
 
       - name: Terraform init
         working-directory: ${{ inputs.tf_dir }}
