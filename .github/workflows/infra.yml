@@ -15,6 +15,10 @@ on:
         type: string
         required: true
 
+      container_image:
+        type: string
+        required: true
+
       tf_dir:
         type: string
         required: true
