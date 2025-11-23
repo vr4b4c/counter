@@ -12,9 +12,6 @@ resource "aws_lb_target_group" "app" {
 
 resource "aws_lb_listener_rule" "app" {
   listener_arn = var.alb_listener_arn
-  # Generate a unique priority based on env_id to avoid conflicts
-  # Using modulo to keep priority in valid range (1-50000, but keeping it reasonable)
-  priority = tonumber("0x${substr(md5("${var.app_name}-${var.env_id}"), 0, 8)}") % 500 + 1
 
   action {
     type             = "forward"
