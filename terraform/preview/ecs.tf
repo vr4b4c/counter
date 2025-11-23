@@ -88,7 +88,7 @@ resource "aws_ecs_service" "app" {
   }
 
   depends_on = [
-    aws_lb_listener.app
+    aws_lb_listener_rule.app
   ]
 
   tags = {
