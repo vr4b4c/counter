@@ -23,7 +23,10 @@ resource "aws_ecs_task_definition" "app" {
         {
           name  = "REDIS_URL"
           value = var.redis_url
-
+        },
+        {
+          name = "ENV_ID",
+          value = var.env_id
         }
       ]
 
