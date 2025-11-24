@@ -67,3 +67,8 @@ variable "redis_sg_id" {
   description = "Security group ID for Redis"
   type        = string
 }
+
+variable "alb_listener_arn" {
+  description = "ARN of the default ALB listener on port 80"
+  type        = string
+}

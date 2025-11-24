@@ -18,6 +18,11 @@ output "alb_sg_id" {
   value       = aws_security_group.alb.id
 }
 
+output "alb_listener_arn" {
+  description = "ARN of the default ALB listener on port 80"
+  value       = aws_lb_listener.default.arn
+}
+
 output "redis_url" {
   description = "Redis URL"
   value       = "redis://${aws_elasticache_cluster.redis.cache_nodes.0.address}:6379"

@@ -44,3 +44,19 @@ resource "aws_lb" "main" {
     Name = "${var.app_name}-alb"
   }
 }
+
+resource "aws_lb_listener" "default" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "No matching listener rule"
+      status_code  = "404"
+    }
+  }
+}

@@ -23,7 +23,10 @@ resource "aws_ecs_task_definition" "app" {
         {
           name  = "REDIS_URL"
           value = var.redis_url
-
+        },
+        {
+          name = "ENV_ID",
+          value = var.env_id
         }
       ]
 
@@ -88,7 +91,7 @@ resource "aws_ecs_service" "app" {
   }
 
   depends_on = [
-    aws_lb_listener.app
+    aws_lb_listener_rule.app
   ]
 
   tags = {

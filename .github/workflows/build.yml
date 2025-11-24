@@ -1,7 +1,7 @@
 name: Build
 
 on: 
-  push:
+  pull_request:
 
 jobs:
   build-and-push-docker-image:
@@ -10,4 +10,16 @@ jobs:
       git_ref: ${{ github.sha }}
       aws_region: 'eu-central-1'
       tags: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
+    secrets: inherit
+
+  preview-infra:
+    needs: build-and-push-docker-image
+    uses: ./.github/workflows/infra.yml
+    with:
+      git_ref: ${{ github.sha }}
+      aws_region: 'eu-central-1'
+      env_id: pr-${{ github.event.number }}
+      container_image: ${{ vars.AWS_ECR_URI }}:${{ github.sha }}
+      tf_dir: 'terraform/preview'
+      tf_action: ${{ github.event.action != 'closed' && 'apply' || 'destroy' }}
     secrets: inherit
