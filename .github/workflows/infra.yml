@@ -2,6 +2,31 @@ name: Infrastructure
 
 on:
   workflow_dispatch:
+    inputs:
+      git_ref:
+        type: string
+        required: false
+
+      aws_region:
+        type: string
+        required: true
+
+      env_id:
+        type: string
+        required: true
+
+      container_image:
+        type: string
+        required: true
+
+      tf_dir:
+        type: string
+        required: true
+
+      tf_action:
+        type: string
+        required: true
+
   workflow_call:
     inputs:
       git_ref:
