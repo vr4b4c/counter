@@ -1,6 +1,7 @@
 name: Infrastructure
 
 on:
+  workflow_dispatch:
   workflow_call:
     inputs:
       git_ref:
